@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import researchProject.sessionServer.domain.writeRequest.helper.TimeHelper;
-import researchProject.sessionServer.domain.writeRequest.manager.SessionValkeyManager;
+import researchProject.sessionServer.domain.writeRequest.manager.SessionValkeyWriteManager;
+import researchProject.sessionServer.domain.writeRequest.manager.SessionValkeyWriteManager;
 
 @Slf4j
 @Service
@@ -19,7 +20,7 @@ public class WriteService {
      *
      */
 
-    private final SessionValkeyManager sessionValkeyManager;
+    private final SessionValkeyWriteManager sessionValkeyWriteManager;
     private static final long TTL_MINUTES = 30;
 
     // 세션 서버에 테스트 데이터 전송 메서드
@@ -32,7 +33,7 @@ public class WriteService {
         String key = "test:currentTime";
 
         // 세션 서버에 현재의 시간대 저장
-        sessionValkeyManager.setValue(key, currentTime, TTL_MINUTES);
+        sessionValkeyWriteManager.setValue(key, currentTime, TTL_MINUTES);
         log.info("Session Server에 테스트 데이터 저장 완료: key={}, value={}", key, currentTime);
 
         return currentTime;
