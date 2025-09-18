@@ -9,11 +9,15 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.TimeUnit;
 
 @Component
-@RequiredArgsConstructor
+// @RequiredArgsConstructor
 public class SessionValkeyWriteManager {
 
-    @Qualifier("sessionValkeyTemplate")
     private final RedisTemplate<String, String> sessionValkeyTemplate;
+
+    public SessionValkeyWriteManager(
+            @Qualifier("sessionWriteTemplate") RedisTemplate<String, String> sessionValkeyTemplate) {
+        this.sessionValkeyTemplate = sessionValkeyTemplate;
+    }
 
     // 세션 서버에 값 저장
     public void setValue(String key, String value, long ttlMinutes) {
