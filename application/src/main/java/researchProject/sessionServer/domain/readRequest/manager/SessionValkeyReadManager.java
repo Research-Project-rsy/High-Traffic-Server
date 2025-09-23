@@ -25,11 +25,8 @@ public class SessionValkeyReadManager {
     // Connection Pool 사용 안함 - 매 연결 시, 팩토리/템플릿 생성 삭제
     public String getValue(String key) {
 
-        // 레플리카 DB 선택
-        RedisTemplate<String, String> template = nextTemplate();
-
-        // 값 선택
-        ValueOperations<String, String> ops = template.opsForValue();
+        RedisTemplate<String, String> template = nextTemplate(); // 레플리카 DB 선택
+        ValueOperations<String, String> ops = template.opsForValue(); // 값 선택
         return ops.get(key);
     }
 
@@ -57,6 +54,5 @@ public class SessionValkeyReadManager {
         template.afterPropertiesSet();
         return template;
     }
-
 
 }
