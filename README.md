@@ -1,6 +1,10 @@
 ## NoSQL(Valkey)기반 Session Server 안정화 연구 프로젝트
 
-### 1. Connection 자원 비효율적 활용으로 인한, 트래픽 처리 Latency 발생 문제 해결 
+* 문서 정리 링크 :https://knotty-toast-80a.notion.site/26b1979809dd800681eff595e8dbe3bd?source=copy_link
+
+----
+
+### 1. Connection Pool, SingleTon을 활용한 Latency 개선: 724.94ms → 33.28ms (약 21.8배 감소)
 #### Stiuation
 * wrk 부하 테스트 시 지연(latency) 평균 700ms 이상, 처리량 50 req/s 수준, Socket timeout 발생
 #### Task
