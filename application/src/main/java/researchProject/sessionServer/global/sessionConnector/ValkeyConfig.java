@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -33,6 +34,7 @@ public class ValkeyConfig {
     }
 
     @Bean(name = "sessionPrimaryConnectionFactory")
+    @Primary //  Primary 지정, auto-config 기본 Bean으로 사용됨
     public RedisConnectionFactory sessionPrimaryConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
         config.setHostName(sessionWriteHost);
@@ -40,30 +42,26 @@ public class ValkeyConfig {
         return new LettuceConnectionFactory(config);
     }
 
-    // ======================= Read (Round Robin) =========================
-    private final AtomicInteger rrCounter = new AtomicInteger(0);
+    // ======================= Read (Round Robin) ver 2.0 =========================
 
-    @Bean(name = "sessionReadTemplate")
-    public RedisTemplate<String, String> sessionReadTemplate() {
-        return buildTemplate(nextReplicaConnectionFactory());
+    @Bean(name = "sessionRead1Template")
+    public RedisTemplate<String, String> sessionRead1Template(@Qualifier("sessionRead1ConnectionFactory") RedisConnectionFactory factory) {
+        return buildTemplate(factory);
     }
 
-    private RedisConnectionFactory nextReplicaConnectionFactory() {
-        int index = rrCounter.getAndUpdate(i -> (i + 1) % 2);
+    @Bean(name = "sessionRead2Template")
+    public RedisTemplate<String, String> sessionRead2Template(@Qualifier("sessionRead2ConnectionFactory") RedisConnectionFactory factory) {
+        return buildTemplate(factory);
+    }
 
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        if (index == 0) {
-            config.setHostName(sessionRead1Host);
-            config.setPort(sessionRead1Port);
-        } else {
-            config.setHostName(sessionRead2Host);
-            config.setPort(sessionRead2Port);
-        }
+    @Bean(name = "sessionRead1ConnectionFactory")
+    public LettuceConnectionFactory sessionRead1ConnectionFactory() {
+        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(sessionRead1Host, sessionRead1Port));
+    }
 
-        LettuceConnectionFactory factory = new LettuceConnectionFactory(config);
-        factory.afterPropertiesSet();
-
-        return factory;
+    @Bean(name = "sessionRead2ConnectionFactory")
+    public LettuceConnectionFactory sessionRead2ConnectionFactory() {
+        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(sessionRead2Host, sessionRead2Port));
     }
 
     // ======================= 공용 템플릿 빌더 =========================
@@ -79,4 +77,30 @@ public class ValkeyConfig {
         template.afterPropertiesSet();
         return template;
     }
+
+    // ======================= Read (Round Robin) ver 1.0 =========================
+//    private final AtomicInteger rrCounter = new AtomicInteger(0);
+//
+//    @Bean(name = "sessionReadTemplate")
+//    public RedisTemplate<String, String> sessionReadTemplate() {
+//        return buildTemplate(nextReplicaConnectionFactory());
+//    }
+//
+//    private RedisConnectionFactory nextReplicaConnectionFactory() {
+//        int index = rrCounter.getAndUpdate(i -> (i + 1) % 2);
+//
+//        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+//        if (index == 0) {
+//            config.setHostName(sessionRead1Host);
+//            config.setPort(sessionRead1Port);
+//        } else {
+//            config.setHostName(sessionRead2Host);
+//            config.setPort(sessionRead2Port);
+//        }
+//
+//        LettuceConnectionFactory factory = new LettuceConnectionFactory(config);
+//        factory.afterPropertiesSet();
+//
+//        return factory;
+//    }
 }
