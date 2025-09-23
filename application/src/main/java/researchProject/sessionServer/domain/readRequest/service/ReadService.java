@@ -10,7 +10,10 @@ import researchProject.sessionServer.domain.readRequest.manager.SessionValkeyRea
 @RequiredArgsConstructor
 public class ReadService {
 
+    /* Connection Pool / SingleTone 적용 X - 매 요청마다 Connection 연결&생성 */
     private final SessionValkeyReadManager sessionValkeyReadManager;
+
+
 
     // 세션 서버에 테스트 데이터 조회 메서드
     public String testRead() {
