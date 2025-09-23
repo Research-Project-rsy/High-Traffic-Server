@@ -1,0 +1,28 @@
+services:
+  wrk:
+    image: williamyeh/wrk:latest
+    container_name: wrk-performance-test
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    entrypoint: ["wrk"]
+    # 기본 명령어 예시 (실제 사용시 오버라이드)
+    command: ["--help"]
+    # 사용 예시:
+    # docker-compose run --rm wrk -t12 -c400 -d30s http://localhost:8080/api/read/test
+    # docker-compose run --rm wrk -t12 -c400 -d30s http://host.docker.internal:8080/api/read/test
+    # docker-compose run --rm wrk -t12 -c400 -d30s --script=test.lua http://localhost:8080/api/write/test
+
+  jmeter:
+    image: justb4/jmeter:latest
+    container_name: jmeter-performance-test
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./jmeter:/jmeter
+    working_dir: /jmeter
+    # 기본 명령어 예시 (실제 사용시 오버라이드)
+    command: ["--help"]
+    # 사용 예시:
+    # docker-compose run --rm jmeter -n -t test-plan.jmx -l results.jtl
+    # docker-compose run --rm jmeter -n -t test-plan.jmx -l results.jtl -e -o html-report
+
