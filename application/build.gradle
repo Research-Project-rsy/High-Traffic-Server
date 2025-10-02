@@ -33,6 +33,10 @@ dependencies {
 	/*lombok*/
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	/* Apache Commons Pool2 */
+	implementation 'org.apache.commons:commons-pool2'
+
 }
 
 tasks.named('test') {

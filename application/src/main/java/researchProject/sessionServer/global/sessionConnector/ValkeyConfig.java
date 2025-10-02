@@ -1,18 +1,21 @@
 package researchProject.sessionServer.global.sessionConnector;
 
+import io.lettuce.core.api.StatefulConnection;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.time.Duration;
 
 @Configuration
 public class ValkeyConfig {
@@ -42,8 +45,7 @@ public class ValkeyConfig {
         return new LettuceConnectionFactory(config);
     }
 
-    // ======================= Read (Round Robin) ver 2.0 =========================
-
+    // ======================= Read (Round Robin) with Pool Ver3.0 =========================
     @Bean(name = "sessionRead1Template")
     public RedisTemplate<String, String> sessionRead1Template(@Qualifier("sessionRead1ConnectionFactory") RedisConnectionFactory factory) {
         return buildTemplate(factory);
@@ -56,12 +58,30 @@ public class ValkeyConfig {
 
     @Bean(name = "sessionRead1ConnectionFactory")
     public LettuceConnectionFactory sessionRead1ConnectionFactory() {
-        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(sessionRead1Host, sessionRead1Port));
+        return createPooledFactory(sessionRead1Host, sessionRead1Port);
     }
 
     @Bean(name = "sessionRead2ConnectionFactory")
     public LettuceConnectionFactory sessionRead2ConnectionFactory() {
-        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(sessionRead2Host, sessionRead2Port));
+        return createPooledFactory(sessionRead2Host, sessionRead2Port);
+    }
+
+    // ======================= Helper for pooled Read factories =========================
+    // Helper method inside the same configuration class
+    private LettuceConnectionFactory createPooledFactory(String host, int port) {
+        RedisStandaloneConfiguration serverConfig = new RedisStandaloneConfiguration(host, port);
+
+        GenericObjectPoolConfig<StatefulConnection<?, ?>> poolConfig = new GenericObjectPoolConfig<>();
+        poolConfig.setMaxTotal(128);
+        poolConfig.setMaxIdle(64);
+        poolConfig.setMinIdle(16);
+
+        LettucePoolingClientConfiguration clientConfig = LettucePoolingClientConfiguration.builder()
+                .commandTimeout(Duration.ofSeconds(2))
+                .poolConfig(poolConfig)
+                .build();
+
+        return new LettuceConnectionFactory(serverConfig, clientConfig);
     }
 
     // ======================= 공용 템플릿 빌더 =========================
@@ -77,6 +97,28 @@ public class ValkeyConfig {
         template.afterPropertiesSet();
         return template;
     }
+
+    // ======================= Read (Round Robin) ver 2.0 =========================
+//
+//    @Bean(name = "sessionRead1Template")
+//    public RedisTemplate<String, String> sessionRead1Template(@Qualifier("sessionRead1ConnectionFactory") RedisConnectionFactory factory) {
+//        return buildTemplate(factory);
+//    }
+//
+//    @Bean(name = "sessionRead2Template")
+//    public RedisTemplate<String, String> sessionRead2Template(@Qualifier("sessionRead2ConnectionFactory") RedisConnectionFactory factory) {
+//        return buildTemplate(factory);
+//    }
+//
+//    @Bean(name = "sessionRead1ConnectionFactory")
+//    public LettuceConnectionFactory sessionRead1ConnectionFactory() {
+//        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(sessionRead1Host, sessionRead1Port));
+//    }
+//
+//    @Bean(name = "sessionRead2ConnectionFactory")
+//    public LettuceConnectionFactory sessionRead2ConnectionFactory() {
+//        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(sessionRead2Host, sessionRead2Port));
+//    }
 
     // ======================= Read (Round Robin) ver 1.0 =========================
 //    private final AtomicInteger rrCounter = new AtomicInteger(0);
