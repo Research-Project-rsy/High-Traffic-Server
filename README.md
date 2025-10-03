@@ -26,3 +26,4 @@ https://knotty-toast-80a.notion.site/26b1979809dd800681eff595e8dbe3bd?source=cop
 - [Poc] Valkey Sentinel 프로세스 + 5배 수평 확장 서버 증설 테스트 환경 구축 완료
 - [Poc - Issue] Valkey - Sentinel간의 연결 불가 이슈  -  Sentinel configuration에서 hostname을 resolve “sentinel resolve-hostnames yes”
 - [Poc] WAS-Sentinel Layer - DB 라인 안정화 작업
+- 현재 진행 중 ....
