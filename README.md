@@ -1,28 +1,19 @@
-## NoSQL(Valkey)기반 Session Server 안정화 연구 프로젝트
+### Session 서버 연구 Log
 
-### 1. Connection 자원 비효율적 활용으로 인한, 트래픽 처리 Latency 발생 문제 해결 
-#### Stiuation
-* wrk 부하 테스트 시 지연(latency) 평균 700ms 이상, 처리량 50 req/s 수준, Socket timeout 발생
-#### Task
-* WAS 레이어의 Connection 프로세스를 개선하여, Latency를 최소화 시켜야 함  
-#### Action 
-* 싱글톤 패턴 적용 : Valkey Config의 ConnectionFactory, RedisTemplate 빈 재사용 
-* 커넥션 풀 적용 : LettuceConnectionFactory 내부에서 TCP 연결을 Pooling 하여 Connection을 재사용
-#### Result
-| 구분       | Avg Latency | Req/Sec | Total Requests | Socket Timeout |
-|----------| ----------- | ------- | -------------- | -------------- |
-| **개선 전** | 724.94ms    | 8.03    | 1,491          | 99             |
-| **개선 후** | 33.28ms     | 156.46  | 47,378         | 48             |
-
-### 정리
-현 실무 기준으로 봤을때,    
-* 소규모 웹 서비스: 초당 수십~수백 req 수준    
-* 중규모 서비스: 초당 수천~수만 req   
-* 대규모 서비스: 초당 수십만~수백만 req
-
-나의 모든 스레드를 합산한 req는 평균 1,580 req/s였다.  
-이는 소규모 서비스 ~ 중규모 서비스 초입 수준은 커버가 가능하다는 의미이다.   
-다음은 Thread, Connection, Redis 클러스터, Pool 튜닝등을 활용하여, 중규모 서비스까지 커버 가능한 시스템을 구축할 차례이다.
-
-
-
+- [Setting] Valkey Instance 이중화 완료 → Primary (인스턴스 수 : 1) + Replica (인스턴스 수 : 2)
+- [Setting] Replica의 Primary 데이터 실시간 복제 성공 → **( !!! 추가 과제 발생 : 복제 Cool Time 줄여서 Primary-Replica 간 데이터 불일치 시나리오 방지하기 !!!)**
+- [Setting] Spring Boot - Primary Valkey Instance 연결 완료
+- [트래픽 분산] Round Rofin 로드 밸런싱 전략 → 읽기 트래픽 다중 Replica에 균등 분배 성공
+- [Test 진행] 동시 400 요청 연결 Test → 다양한 문제 발생 → 원인 추적을 위해 트래픽 감소
+- [Test 진행] 동시 50 요청 연결 Test → WAS 영역에서 Read 트래픽 처리 Latency 발생
+- [병목 Point 발견] Connection Pooling 로직의 문제 확인 → 높은 커넥션 생성/삭제 비용으로 인한 트래픽 처리 Latency 발생
+- [성능 개선] SingleTon + Connection Pool로 **Latency 개선 시도 → Latency Time 약 21.8배 감소 (724.94ms → 33.28ms )**
+- [중규모 트래픽 처리] 스레드 24, 커넥션 500, 기한 60초로 중규모 트레픽 테스트 → 3000 req/sec 달성
+- [목표 설정] 대규모 서비스를 기준으로 서버 최적화 진행하기 → 10000 req/sec 목표 설정
+- [성능 개선] WAS-DB 사이의 Connection Pool 8배 증설 + WAS의 Thread Pool 설정 → Total req/sec 10% 향상 성공
+- [성능 개선 시도 - 실패] JVM 튜닝을 통한 성능 향상 시도 → Total req/sec 70% 감소
+- [목표 설정] WAS/DB 수평 확장을 통한 대규모 트래픽 대응 → WAS 5/DB 15로 확장
+- [목표 설정] Valkey Sentinel 추가 → Connection 로직 단순화 + Fail-Over 시스템 추가
+- [Poc] Valkey Sentinel 프로세스 + 5배 수평 확장 서버 증설 테스트 환경 구축 완료
+- [Poc - Issue] Valkey - Sentinel간의 연결 불가 이슈  -  Sentinel configuration에서 hostname을 resolve “sentinel resolve-hostnames yes”
+- [Poc] WAS-Sentinel Layer - DB 라인 안정화 작업
