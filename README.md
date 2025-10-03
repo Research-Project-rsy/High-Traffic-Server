@@ -1,5 +1,12 @@
 ### Session 서버 연구 Log
 
+<img width="360" height="270" alt="HighTrafficArch" src="https://github.com/user-attachments/assets/2d7b086f-3bdc-4966-a720-b89a507c9520" />
+
+#### 연구 기록 보관소(Notion) : https://knotty-toast-80a.notion.site/26b1979809dd800681eff595e8dbe3bd?source=copy_link  
+
+---
+
+
 - [Setting] Valkey Instance 이중화 완료 → Primary (인스턴스 수 : 1) + Replica (인스턴스 수 : 2)
 - [Setting] Replica의 Primary 데이터 실시간 복제 성공 → **( !!! 추가 과제 발생 : 복제 Cool Time 줄여서 Primary-Replica 간 데이터 불일치 시나리오 방지하기 !!!)**
 - [Setting] Spring Boot - Primary Valkey Instance 연결 완료
