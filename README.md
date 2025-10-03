@@ -2,7 +2,8 @@
 
 <img width="660" height="440" alt="HighTrafficArch" src="https://github.com/user-attachments/assets/2d7b086f-3bdc-4966-a720-b89a507c9520" />
 
-#### 연구 기록 보관소(Notion) : https://knotty-toast-80a.notion.site/26b1979809dd800681eff595e8dbe3bd?source=copy_link  
+#### 연구 기록 보관소(Notion) :    
+https://knotty-toast-80a.notion.site/26b1979809dd800681eff595e8dbe3bd?source=copy_link  
 
 ---
 
