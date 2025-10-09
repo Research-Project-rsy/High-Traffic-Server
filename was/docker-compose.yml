@@ -1,0 +1,66 @@
+services:
+  was-1:
+    build:
+      context: .
+    image: was:latest
+    container_name: was-1
+    environment:
+      - SERVER_PORT=8080
+    expose:
+      - "8080"
+    networks:
+      - app-net
+
+  was-2:
+    image: was:latest
+    container_name: was-2
+    environment:
+      - SERVER_PORT=8080
+    expose:
+      - "8080"
+    networks:
+      - app-net
+    depends_on:
+      - was-1
+
+  was-3:
+    image: was:latest
+    container_name: was-3
+    environment:
+      - SERVER_PORT=8080
+    expose:
+      - "8080"
+    networks:
+      - app-net
+    depends_on:
+      - was-1
+
+  was-4:
+    image: was:latest
+    container_name: was-4
+    environment:
+      - SERVER_PORT=8080
+    expose:
+      - "8080"
+    networks:
+      - app-net
+    depends_on:
+      - was-1
+
+  was-5:
+    image: was:latest
+    container_name: was-5
+    environment:
+      - SERVER_PORT=8080
+    expose:
+      - "8080"
+    networks:
+      - app-net
+    depends_on:
+      - was-1
+
+networks:
+  app-net:
+    external: true
+
+
