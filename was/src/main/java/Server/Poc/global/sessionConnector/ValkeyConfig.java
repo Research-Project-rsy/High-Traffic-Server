@@ -64,9 +64,13 @@ public class ValkeyConfig {
         RedisStandaloneConfiguration serverConfig = new RedisStandaloneConfiguration(host, port);
 
         GenericObjectPoolConfig<StatefulConnection<?, ?>> poolConfig = new GenericObjectPoolConfig<>();
-        poolConfig.setMaxTotal(128);
-        poolConfig.setMaxIdle(64);
-        poolConfig.setMinIdle(16);
+        poolConfig.setMaxTotal(512);
+        poolConfig.setMaxIdle(256);
+        poolConfig.setMinIdle(64);
+
+//        poolConfig.setMaxTotal(128);
+//        poolConfig.setMaxIdle(64);
+//        poolConfig.setMinIdle(16);
 
         LettucePoolingClientConfiguration clientConfig = LettucePoolingClientConfiguration.builder()
                 .commandTimeout(Duration.ofSeconds(2))
