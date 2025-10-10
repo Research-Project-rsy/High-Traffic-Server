@@ -1,0 +1,14 @@
+services:
+  nginx:
+    build:
+      context: .
+    container_name: nginx
+    ports:
+      - "80:80"
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    external: true
+
